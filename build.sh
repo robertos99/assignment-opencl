@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # Script to build and run the C project using CMake
-EXECUTABLE_NAME="helloworld"
+EXECUTABLE_NAME="assignment-opencl"
 BUILD_DIR="build"
 BIN_DIR="bin"
 
@@ -57,6 +57,7 @@ case $1 in
         ;;
 
     buildAndTest)
+        mkdir -p $BUILD_DIR
         cd $BUILD_DIR
         cmake ..
         make

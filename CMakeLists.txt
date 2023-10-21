@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.10)
-project(helloworld)
+project(assignment-opencl)
 
 ## Dependencies
 include(FetchContent)
@@ -21,14 +21,14 @@ add_library(core_lib STATIC src/helloworld.c)
 target_include_directories(core_lib PUBLIC src)
 
 ## Main executable
-add_executable(helloworld src/main.c)
-target_link_libraries(helloworld core_lib)
-set_target_properties(helloworld PROPERTIES RUNTIME_OUTPUT_DIRECTORY ${CMAKE_SOURCE_DIR}/bin)
+add_executable(assignment-opencl src/main.c)
+target_link_libraries(assignment-opencl core_lib)
+set_target_properties(assignment-opencl PROPERTIES RUNTIME_OUTPUT_DIRECTORY ${CMAKE_SOURCE_DIR}/bin)
 
 ## Unit tests using Unity
 enable_testing()
-add_executable(helloworld_tests tests/test_helloworld.c ${unity_SOURCE_DIR}/src/unity.c)
-target_link_libraries(helloworld_tests core_lib)
-target_include_directories(helloworld_tests PRIVATE ${unity_SOURCE_DIR}/src)
-set_target_properties(helloworld_tests PROPERTIES RUNTIME_OUTPUT_DIRECTORY ${CMAKE_SOURCE_DIR}/bin)
-add_test(NAME helloworld_tests COMMAND helloworld_tests)
+add_executable(assignment-opencl_tests tests/test_helloworld.c ${unity_SOURCE_DIR}/src/unity.c)
+target_link_libraries(assignment-opencl_tests core_lib)
+target_include_directories(assignment-opencl_tests PRIVATE ${unity_SOURCE_DIR}/src)
+set_target_properties(assignment-opencl_tests PROPERTIES RUNTIME_OUTPUT_DIRECTORY ${CMAKE_SOURCE_DIR}/bin)
+add_test(NAME assignment-opencl_tests COMMAND assignment-opencl_tests)
