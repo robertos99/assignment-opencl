@@ -1,10 +1,10 @@
-# C Project Template
+# Assignment OpenCL
 
-A basic C project template with dependency management via CMake, Unity for testing, and a well-defined project structure. Designed as a foundation for new C projects.
+Assignment OpenCL
 
 ## Table of Contents
 
-- [C Project Template](#c-project-template)
+- [Assignment OpenCL](#assignment-opencl)
 - [Table of Contents](#table-of-contents)
 - [Getting Started](#getting-started)
   - [Prerequisites](#prerequisites)
@@ -32,11 +32,11 @@ Here's what you'll need to run the project:
 
 1. **Clone the Repository**
     ```bash
-   git clone https://github.com/robertos99/c-template.git
+   git clone https://github.com/robertos99/assignment-opencl.git
 
 2. **Navigate to the Project Directory**
     ```bash
-   cd c-template
+   cd assignment-opencl
 
 3. **Build the Project** (this will generate all the folders and download Unity dependancies)
 
