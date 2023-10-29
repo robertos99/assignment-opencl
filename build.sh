@@ -15,7 +15,7 @@ function display_help() {
     echo "  all             Build and then run the project (build main and test, run only main)"
     echo "  test            Run tests"
     echo "  buildAndTest    Build and then test the project (build main and test, run only tests)"
-    echo "  release         Build the project with high optimization -o3 (SIMD,...)
+    echo "  release         Build the project with high optimization -o3 (SIMD,...)"
     echo "  help            Display this help message"
 }
 
