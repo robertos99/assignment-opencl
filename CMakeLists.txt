@@ -15,15 +15,34 @@ if(NOT unity_POPULATED)
 endif()
 FetchContent_MakeAvailable(unity)
 
+# Fetch stb
+FetchContent_Declare(
+    stb
+    GIT_REPOSITORY https://github.com/nothings/stb.git
+    GIT_TAG master  # or a specific version or commit
+)
+FetchContent_GetProperties(stb)
+if(NOT stb_POPULATED)
+    FetchContent_Populate(stb)
+    include_directories(${stb_SOURCE_DIR})
+endif()
 
 ## Core library from source files
-add_library(core_lib STATIC src/helloworld.c)
-target_include_directories(core_lib PUBLIC src)
+add_library(core_lib STATIC src/helloworld.c src/stb_image.c)
+target_include_directories(core_lib PUBLIC src ${stb_SOURCE_DIR})
+target_link_libraries(core_lib m)
+
 
 ## Main executable
 add_executable(assignment-opencl src/main.c)
 target_link_libraries(assignment-opencl core_lib)
 set_target_properties(assignment-opencl PROPERTIES RUNTIME_OUTPUT_DIRECTORY ${CMAKE_SOURCE_DIR}/bin)
+
+## Main Debug executable
+add_executable(assignment-opencl_debug src/main.c)
+target_link_libraries(assignment-opencl_debug core_lib)
+set_target_properties(assignment-opencl_debug PROPERTIES RUNTIME_OUTPUT_DIRECTORY ${CMAKE_SOURCE_DIR}/bin)
+set_target_properties(assignment-opencl_debug PROPERTIES COMPILE_FLAGS "-g")
 
 ## Unit tests using Unity
 enable_testing()
