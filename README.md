@@ -2,7 +2,6 @@
 
 Assignment OpenCL
 
-
 ## Table of Contents
 
 - [Assignment OpenCL](#assignment-opencl)
