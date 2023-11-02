@@ -5,7 +5,10 @@ project(assignment-opencl)
 set(CMAKE_CXX_STANDARD 11)
 set(CMAKE_CXX_STANDARD_REQUIRED True)
 
-## Dependencies
+#=======================================
+#==== Dependencies
+#=======================================
+
 include(FetchContent)
 
 # Fetch Catch2
@@ -24,10 +27,18 @@ FetchContent_Declare(
 )
 FetchContent_MakeAvailable(stb)
 
+#=======================================
+#==== Core-Lib
+#=======================================
+
 ## Core library from source files
 add_library(core_lib STATIC src/helloworld.cpp src/stb_image.cpp)
 target_include_directories(core_lib PUBLIC src ${stb_SOURCE_DIR})
 target_link_libraries(core_lib m)
+
+#=======================================
+#==== Binaries
+#=======================================
 
 ## Main executable
 add_executable(assignment-opencl src/main.cpp)
@@ -40,6 +51,8 @@ target_link_libraries(assignment-opencl_debug core_lib)
 target_compile_options(assignment-opencl_debug PRIVATE "-g")
 set_target_properties(assignment-opencl_debug PROPERTIES RUNTIME_OUTPUT_DIRECTORY ${CMAKE_SOURCE_DIR}/bin)
 
+
+# Test setup
 ## Unit tests using Catch2
 enable_testing()
 add_executable(assignment-opencl_tests tests/test_helloworld.cpp)
