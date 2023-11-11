@@ -3,6 +3,6 @@
 
 const char *say_hello();
 
-const int load_image();
+int load_image();
 
 #endif

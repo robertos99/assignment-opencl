@@ -4,7 +4,7 @@
 #include "stb_image.h"
 #include "stb_image_write.h"
 
-#include "helloworld.h"
+#include "helloworld.hpp"
 
 const char *say_hello()
 {
