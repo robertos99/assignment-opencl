@@ -1,9 +1,9 @@
-#include "helloworld.hpp"
-#include <stdio.h>
+    #include "helloworld.hpp"
+    #include <stdio.h>
 
-int main()
-{
-    puts(say_hello());
-    load_image();
-    return 0;
-}
+    int main()
+    {
+        puts(say_hello());
+        load_image();
+        return 0;
+    }

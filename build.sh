@@ -31,7 +31,7 @@ case $1 in
     build)
         mkdir -p $BUILD_DIR
         cd $BUILD_DIR
-        cmake ..
+        cmake .. &&
         make
         ;;
 
@@ -46,8 +46,8 @@ case $1 in
     all)
         mkdir -p $BUILD_DIR
         cd $BUILD_DIR
-        cmake ..
-        make
+        cmake .. &&
+        make && 
         cd ..
         ./$BIN_DIR/$EXECUTABLE_NAME
         ;;
@@ -60,8 +60,8 @@ case $1 in
     buildAndTest)
         mkdir -p $BUILD_DIR
         cd $BUILD_DIR
-        cmake ..
-        make
+        cmake .. &&
+        make &&
         ctest --verbose
         ;;
 
