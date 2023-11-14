@@ -4,6 +4,9 @@
 #include "stb_image.h"
 #include "stb_image_write.h"
 
+// OpenCL includes
+#include <CL/cl.h>
+
 #include "helloworld.hpp"
 
 const char *say_hello()
@@ -34,4 +37,17 @@ int load_image()
 
     printf("Image processing complete. Output saved as output_image.png.\n");
     return EXIT_SUCCESS;
+}
+
+void clsetup() {
+    
+    cl_int CL_err = CL_SUCCESS;
+    cl_uint numPlatforms = 0;
+
+    CL_err = clGetPlatformIDs( 0, NULL, &numPlatforms );
+
+    if (CL_err == CL_SUCCESS)
+        printf("%u platform(s) found\n", numPlatforms);
+    else
+        printf("clGetPlatformIDs(%i)\n", CL_err);
 }

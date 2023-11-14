@@ -34,7 +34,9 @@ FetchContent_MakeAvailable(stb)
 ## Core library from source files
 add_library(core_lib STATIC src/helloworld.cpp src/stb_image.cpp)
 target_include_directories(core_lib PUBLIC src ${stb_SOURCE_DIR})
-target_link_libraries(core_lib)
+target_link_libraries(core_lib OpenCL)
+target_compile_definitions(core_lib PUBLIC CL_TARGET_OPENCL_VERSION=100)
+target_compile_options(core_lib PRIVATE -Wall -Wextra)
 
 #=======================================
 #==== Binaries

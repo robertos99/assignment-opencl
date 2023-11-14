@@ -5,4 +5,6 @@ const char *say_hello();
 
 int load_image();
 
+void clsetup();
+
 #endif
