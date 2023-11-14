@@ -32,7 +32,7 @@ FetchContent_MakeAvailable(stb)
 #=======================================
 
 ## Core library from source files
-add_library(core_lib STATIC src/helloworld.cpp src/stb_image.cpp)
+add_library(core_lib STATIC src/lib.cpp src/stb_image.cpp)
 target_include_directories(core_lib PUBLIC src ${stb_SOURCE_DIR})
 target_link_libraries(core_lib OpenCL)
 target_compile_definitions(core_lib PUBLIC CL_TARGET_OPENCL_VERSION=100)
@@ -57,7 +57,7 @@ set_target_properties(assignment-opencl_debug PROPERTIES RUNTIME_OUTPUT_DIRECTOR
 # Test setup
 ## Unit tests using Catch2
 enable_testing()
-add_executable(assignment-opencl_tests tests/test_helloworld.cpp)
+add_executable(assignment-opencl_tests tests/test_lib.cpp)
 target_link_libraries(assignment-opencl_tests core_lib Catch2::Catch2)
 set_target_properties(assignment-opencl_tests PROPERTIES RUNTIME_OUTPUT_DIRECTORY ${CMAKE_SOURCE_DIR}/bin)
 

@@ -7,7 +7,7 @@
 // OpenCL includes
 #include <CL/cl.h>
 
-#include "helloworld.hpp"
+#include "lib.hpp"
 
 const char *say_hello()
 {
