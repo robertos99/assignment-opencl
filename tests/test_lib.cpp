@@ -1,7 +1,7 @@
 #define CATCH_CONFIG_MAIN
 #include <catch2/catch.hpp>
 
-#include "helloworld.hpp"
+#include "lib.hpp"
 
 TEST_CASE("say_hello returns the correct string", "[hello_world]")
 {
