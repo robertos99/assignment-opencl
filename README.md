@@ -12,6 +12,7 @@ Assignment OpenCL
 - [Usage](#usage)
 - [Testing](#testing)
 - [Project Structure](#project-structure)
+- [Tooling](#tooling)
 
 ## Getting Started
 
@@ -21,8 +22,8 @@ These instructions will help you set up the project on your local machine for de
 
 Here's what you'll need to run the project:
 
-- **GCC**: Preferred compiler.
-  - Installation (based on your OS, e.g., sudo apt install gcc for Debian-based distros).
+- **GCC/G++**: Preferred compiler.
+  - Installation (based on your OS, e.g., sudo apt install gcc g++ for Debian-based distros).
 - **CMake**: Primary build tool.
    ```bash
    sudo apt-get update 
@@ -72,9 +73,22 @@ The directory structure of this project is as follows:
 ├── build (generated, holds relevant files for builds)
 ├── build.sh (centralized workflows)
 ├── src
-│   ├── helloworld.c (example file for lib)
-│   ├── helloworld.h
-│   └── main.c (main)
+│   ├── lib.cpp (example file for lib)
+│   ├── lib.hpp
+│   └── main.cpp (main)
 ├── tests
-│   └── test_helloworld.c (example test for lib)
+│   └── test_lib.cpp (example test for lib)
 └── third_party (tools, etc.)
+```
+### Tooling
+
+#### Linting
+
+This project uses clang-tidy for linting. We use the LLVM ```.clang-tidy``` rules.
+
+To run the linter on the whole project run: 
+```bash
+./build.sh lint
+```
+
+The project is configured to work with both ```Clangd``` and ```C/C++-Extension``` for VSCode.
