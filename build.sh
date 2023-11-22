@@ -29,40 +29,50 @@ fi
 # Handle the provided argument
 case $1 in
     build)
-        mkdir -p $BUILD_DIR
-        cd $BUILD_DIR
+        mkdir -p "$BUILD_DIR"
+        cd "$BUILD_DIR"
         cmake .. &&
         make
         ;;
 
     run)
-        ./$BIN_DIR/$EXECUTABLE_NAME
+        ./"$BIN_DIR"/"$EXECUTABLE_NAME"
         ;;
 
     clean)
-        rm -rf $BUILD_DIR/
+        rm -rf "$BUILD_DIR"/
         ;;
 
     all)
-        mkdir -p $BUILD_DIR
-        cd $BUILD_DIR
+        mkdir -p "$BUILD_DIR"
+        cd "$BUILD_DIR"
         cmake .. &&
         make && 
         cd ..
-        ./$BIN_DIR/$EXECUTABLE_NAME
+        ./"$BIN_DIR"/"$EXECUTABLE_NAME"
         ;;
 
     test)
-        cd $BUILD_DIR
+        cd "$BUILD_DIR"
         ctest --verbose
         ;;
 
     buildAndTest)
-        mkdir -p $BUILD_DIR
-        cd $BUILD_DIR
+        mkdir -p "$BUILD_DIR"
+        cd "$BUILD_DIR"
         cmake .. &&
         make &&
         ctest --verbose
+        ;;
+
+    lint)
+        if [ -d "$BUILD_DIR" ]; then
+            cd "$BUILD_DIR" &&
+            cmake -DCMAKE_EXPORT_COMPILE_COMMANDS=ON .. &&
+            run-clang-tidy
+        else
+            echo "No build directory exists."
+        fi
         ;;
 
     release)
