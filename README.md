@@ -92,3 +92,7 @@ To run the linter on the whole project run:
 ```
 
 The project is configured to work with both ```Clangd``` and ```C/C++-Extension``` for VSCode.
+
+#### Formatting
+
+This project uses clang-format for linting. We use the LLVM ```.clang-format``` rules.
