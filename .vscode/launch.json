@@ -8,7 +8,7 @@
             "type": "lldb",
             "request": "launch",
             "name": "DebugLLDB",
-            "program": "${workspaceFolder}/bin/assignment-opencl_debug",
+            "program": "${workspaceFolder}/bin/assignment-opencl",
             "args": [],
             "cwd": "${workspaceFolder}",
             "preLaunchTask": "build-project-debug"
