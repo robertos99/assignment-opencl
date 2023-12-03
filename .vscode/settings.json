@@ -68,7 +68,12 @@
         "variant": "cpp",
         "__nullptr": "cpp",
         "__functional_base": "cpp",
-        "locale": "cpp"
+        "locale": "cpp",
+        "complex": "cpp",
+        "list": "cpp",
+        "filesystem": "cpp",
+        "queue": "cpp",
+        "stack": "cpp"
     },
     "cmake.configureOnOpen": false
 }

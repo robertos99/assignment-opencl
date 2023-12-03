@@ -1,8 +1,9 @@
 #include "lib.hpp"
-#include <stdio.h>
 
 int main() {
   clsetup();
-  load_image();
+  load_image("resources/test.png");
+  processImage("resources/cattest.jpg", "resources/cattest2.jpg");
+  processImage2("resources/cattest.jpg", "resources/cattest3.jpg");
   return 0;
 }
