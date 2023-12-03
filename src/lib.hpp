@@ -11,7 +11,6 @@ struct ImageData {
   uchar* blueChannel;
   uchar* greenChannel;
   uchar* redChannel;
-  uchar* alphaChannel;  // Only if the image has an alpha channel
   int width;
   int height;
 
@@ -19,7 +18,6 @@ struct ImageData {
       : blueChannel(nullptr),
         greenChannel(nullptr),
         redChannel(nullptr),
-        alphaChannel(nullptr),
         width(0),
         height(0) {}
 
@@ -27,18 +25,14 @@ struct ImageData {
     delete[] blueChannel;
     delete[] greenChannel;
     delete[] redChannel;
-    delete[] alphaChannel;
   }
 
-  void allocate(int w, int h, bool hasAlpha = false) {
+  void allocate(int w, int h) {
     width = w;
     height = h;
     blueChannel = new uchar[width * height];
     greenChannel = new uchar[width * height];
     redChannel = new uchar[width * height];
-    if (hasAlpha) {
-      alphaChannel = new uchar[width * height];
-    }
   }
 };
 

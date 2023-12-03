@@ -193,7 +193,7 @@ ImageData parseMatToImageData(const cv::Mat& mat) {
   ImageData imgData;
   imgData.width = mat.cols;
   imgData.height = mat.rows;
-  imgData.allocate(imgData.width, imgData.height, mat.channels() == 4);
+  imgData.allocate(imgData.width, imgData.height);
 
   for (int y = 0; y < mat.rows; ++y) {
     for (int x = 0; x < mat.cols; ++x) {
@@ -202,17 +202,13 @@ ImageData parseMatToImageData(const cv::Mat& mat) {
       imgData.blueChannel[idx] = pixel[0];
       imgData.greenChannel[idx] = pixel[1];
       imgData.redChannel[idx] = pixel[2];
-      if (mat.channels() == 4) {
-        imgData.alphaChannel[idx] = mat.at<cv::Vec4b>(y, x)[3];
-      }
     }
   }
   return imgData;
 }
 
 cv::Mat imageDataToMat(const ImageData& imgData) {
-  cv::Mat mat(imgData.height, imgData.width,
-              imgData.alphaChannel != nullptr ? CV_8UC4 : CV_8UC3);
+  cv::Mat mat(imgData.height, imgData.width, CV_8UC3);
   for (int y = 0; y < mat.rows; ++y) {
     for (int x = 0; x < mat.cols; ++x) {
       int idx = y * mat.cols + x;
@@ -220,9 +216,6 @@ cv::Mat imageDataToMat(const ImageData& imgData) {
       pixel[0] = imgData.blueChannel[idx];
       pixel[1] = imgData.greenChannel[idx];
       pixel[2] = imgData.redChannel[idx];
-      if (imgData.alphaChannel != nullptr) {
-        mat.at<cv::Vec4b>(y, x)[3] = imgData.alphaChannel[idx];
-      }
     }
   }
   return mat;
