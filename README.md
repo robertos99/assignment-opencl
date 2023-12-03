@@ -39,7 +39,7 @@ Here's what you'll need to run the project:
     ```bash
    cd assignment-opencl
 
-3. **Build the Project** (this will generate all the folders and download Unity dependancies)
+3. **Build the Project** (this will generate all the folders and download dependancies)
 
     ```bash
     ./build.sh build
@@ -52,6 +52,7 @@ After building, you can run the main application:
 or build the entire project and run the main application:
 
     ./build.sh all
+The binary is build with debug symbols by default. Use ```--release``` flag to build optimized release code.
 
 
 ### Testing
@@ -84,7 +85,7 @@ The directory structure of this project is as follows:
 
 #### Linting
 
-This project uses clang-tidy for linting. We use the LLVM ```.clang-tidy``` rules.
+This project uses clang-tidy for linting. We use the google style ```.clang-tidy``` rules.
 
 To run the linter on the whole project run: 
 ```bash
@@ -95,4 +96,4 @@ The project is configured to work with both ```Clangd``` and ```C/C++-Extension`
 
 #### Formatting
 
-This project uses clang-format for linting. We use the LLVM ```.clang-format``` rules.
+This project uses clang-format for linting. We use the google style ```.clang-format``` rules.
