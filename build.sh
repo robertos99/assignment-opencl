@@ -5,9 +5,8 @@ EXECUTABLE_NAME="assignment-opencl"
 BUILD_DIR="build"
 BIN_DIR="bin"
 
-# Function to display help/usage
 function display_help() {
-    echo "Usage: $0 [OPTION]"
+    echo "Usage: $0 [OPTION] [--release or --debug]"
     echo "Options:"
     echo "  build           Build the project using CMake (main and tests)"
     echo "  run             Run the compiled binary"
@@ -15,7 +14,6 @@ function display_help() {
     echo "  all             Build and then run the project (build main and test, run only main)"
     echo "  test            Run tests"
     echo "  buildAndTest    Build and then test the project (build main and test, run only tests)"
-    echo "  release         Build the project with high optimization -o3 (SIMD,...)"
     echo "  help            Display this help message"
 }
 
@@ -26,12 +24,19 @@ if [ "$#" -lt 1 ]; then
     exit 1
 fi
 
-# Handle the provided argument
+
+BUILD_TYPE="Debug" # Default build type
+if [[ "$2" == "--release" ]]; then
+    BUILD_TYPE="Release"
+elif [[ "$2" == "--debug" ]]; then
+    BUILD_TYPE="Debug"
+fi
+
 case $1 in
     build)
         mkdir -p "$BUILD_DIR"
         cd "$BUILD_DIR"
-        cmake .. &&
+        cmake -DCMAKE_BUILD_TYPE=$BUILD_TYPE .. &&
         make
         ;;
 
@@ -46,7 +51,7 @@ case $1 in
     all)
         mkdir -p "$BUILD_DIR"
         cd "$BUILD_DIR"
-        cmake .. &&
+        cmake -DCMAKE_BUILD_TYPE=$BUILD_TYPE .. &&
         make && 
         cd ..
         ./"$BIN_DIR"/"$EXECUTABLE_NAME"
@@ -60,7 +65,7 @@ case $1 in
     buildAndTest)
         mkdir -p "$BUILD_DIR"
         cd "$BUILD_DIR"
-        cmake .. &&
+        cmake -DCMAKE_BUILD_TYPE=$BUILD_TYPE .. &&
         make &&
         ctest --verbose
         ;;
@@ -73,10 +78,6 @@ case $1 in
         else
             echo "No build directory exists."
         fi
-        ;;
-
-    release)
-        echo "not yet implemented"
         ;;
 
     help|*)

@@ -7,10 +7,11 @@
         {
             "type": "lldb",
             "request": "launch",
-            "name": "Debug",
+            "name": "DebugLLDB",
             "program": "${workspaceFolder}/bin/assignment-opencl_debug",
             "args": [],
-            "cwd": "${workspaceFolder}"
+            "cwd": "${workspaceFolder}",
+            "preLaunchTask": "build-project-debug"
         }
     ]
 }
