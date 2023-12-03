@@ -10,13 +10,13 @@
 
 #include "lib.hpp"
 
-std::string read_kernel(const std::string &filename);
+std::string read_kernel(const std::string& filename);
 
 int load_image() {
   int width = 0;
   int height = 0;
   int channels = 0;
-  unsigned char *img =
+  unsigned char* img =
       stbi_load("resources/test.png", &width, &height, &channels, 0);
   if (img == NULL) {
     std::cerr << "Error in loading the image\n" << std::endl;
@@ -72,9 +72,9 @@ void clsetup() {
   // }
 
   int size = 1024;
-  int *a = new int[size];
-  int *b = new int[size];
-  int *c = new int[size];
+  int* a = new int[size];
+  int* b = new int[size];
+  int* c = new int[size];
 
   for (int i = 0; i < size; i++) {
     a[i] = 1;
@@ -111,7 +111,7 @@ void clsetup() {
   std::cout << "Average is: " << avg << ", should be: 3.0" << std::endl;
 }
 
-std::string read_kernel(const std::string &filename) {
+std::string read_kernel(const std::string& filename) {
   std::string kernel_text;
   std::ifstream kernel_reader;
   kernel_reader.open(filename, std::ios::in);
