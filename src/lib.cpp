@@ -40,13 +40,11 @@ int load_image() {
 }
 
 void clsetup() {
-  // get all platforms (drivers)
   std::vector<cl::Platform> all_platforms;
   cl::Platform::get(&all_platforms);
-  // get default device of the default platform
+
   std::vector<cl::Device> all_devices;
   all_platforms[0].getDevices(CL_DEVICE_TYPE_GPU, &all_devices);
-
   std::cout << "These are the devices available: " << std::endl;
   for (int i = 0; i < all_devices.size(); i++) {
     std::cout << "Device #" << i
@@ -54,34 +52,34 @@ void clsetup() {
               << std::endl;
   }
 
-  // create the context
   cl::Context context({all_devices[0]});
-  // create queue to which we will push commands for the device.
   cl::CommandQueue queue(context, all_devices[0]);
 
-  // read the kernel code
   std::string kernel_source_code = read_kernel("./src/kernel.cl");
-  // Sources is a list of pairs <kernel-code, string length>
   cl::Program::Sources sources;
   sources.push_back({kernel_source_code.c_str(), kernel_source_code.length()});
-  // finally, create and build the code
+
   cl::Program program(context, sources);
-  program.build({all_devices[0]});
-  // Create a Kernel and specify its name
+  cl_int buildStatus = program.build({all_devices[0]});
   cl::Kernel vectorAddKernel(program, "vectorAdd");
 
-  if (program.build({all_devices[0]}) != CL_SUCCESS) {
-    std::cerr << "Cannot build the program!" << std::endl;
-    std::cerr << "Build log: \n"
-              << program.getBuildInfo<CL_PROGRAM_BUILD_LOG>(all_devices[0])
-              << std::endl;
-    exit(1);
-  }
+  // if (program.build({all_devices[0]}) != CL_SUCCESS) {
+  //   std::cerr << "Cannot build the program!" << std::endl;
+  //   std::cerr << "Build log: \n"
+  //             << program.getBuildInfo<CL_PROGRAM_BUILD_LOG>(all_devices[0])
+  //             << std::endl;
+  //   exit(1);
+  // }
 
   int size = 1024;
   int *a = new int[size];
   int *b = new int[size];
   int *c = new int[size];
+
+  for (int i = 0; i < size; i++) {
+    a[i] = 1;
+    b[i] = 2;
+  }
 
   cl::Buffer dev_a(context, CL_MEM_READ_ONLY, sizeof(int) * size);
   cl::Buffer dev_b(context, CL_MEM_READ_ONLY, sizeof(int) * size);
@@ -95,8 +93,8 @@ void clsetup() {
   vectorAddKernel.setArg(2, dev_c);
   vectorAddKernel.setArg(3, size);
 
-  queue.enqueueNDRangeKernel(vectorAddKernel, cl::NullRange,
-                             cl::NDRange(32, 32, 1), cl::NDRange(4, 4, 1));
+  queue.enqueueNDRangeKernel(vectorAddKernel, cl::NullRange, cl::NDRange(1024),
+                             cl::NDRange(4, 4, 1));
 
   queue.enqueueReadBuffer(dev_c, CL_TRUE, 0, sizeof(int) * size, c);
 
@@ -105,9 +103,11 @@ void clsetup() {
   float avg = 0;
 
   for (int i = 0; i < size; i++) {
-    avg += c[i];
+    int ci = c[i];
+    avg += ci;
   }
 
+  avg /= size;
   std::cout << "Average is: " << avg << ", should be: 3.0" << std::endl;
 }
 
