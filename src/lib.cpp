@@ -60,16 +60,14 @@ void clsetup() {
   sources.push_back({kernel_source_code.c_str(), kernel_source_code.length()});
 
   cl::Program program(context, sources);
-  cl_int buildStatus = program.build({all_devices[0]});
+  if (program.build({all_devices[0]}) != CL_SUCCESS) {
+    std::cerr << "Cannot build the program!" << std::endl;
+    std::cerr << "Build log: \n"
+              << program.getBuildInfo<CL_PROGRAM_BUILD_LOG>(all_devices[0])
+              << std::endl;
+    exit(1);
+  }
   cl::Kernel vectorAddKernel(program, "vectorAdd");
-
-  // if (program.build({all_devices[0]}) != CL_SUCCESS) {
-  //   std::cerr << "Cannot build the program!" << std::endl;
-  //   std::cerr << "Build log: \n"
-  //             << program.getBuildInfo<CL_PROGRAM_BUILD_LOG>(all_devices[0])
-  //             << std::endl;
-  //   exit(1);
-  // }
 
   int size = 1024;
   int* a = new int[size];
