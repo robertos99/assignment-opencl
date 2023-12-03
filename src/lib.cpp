@@ -53,7 +53,6 @@ void clsetup() {
   }
 
   cl::Context context({all_devices[0]});
-  cl::CommandQueue queue(context, all_devices[0]);
 
   std::string kernel_source_code = read_kernel("./src/kernel.cl");
   cl::Program::Sources sources;
@@ -70,9 +69,9 @@ void clsetup() {
   cl::Kernel vectorAddKernel(program, "vectorAdd");
 
   int size = 1024;
-  int* a = new int[size];
-  int* b = new int[size];
-  int* c = new int[size];
+  std::unique_ptr<int[]> a(new int[size]);
+  std::unique_ptr<int[]> b(new int[size]);
+  std::unique_ptr<int[]> c(new int[size]);
 
   for (int i = 0; i < size; i++) {
     a[i] = 1;
@@ -83,8 +82,9 @@ void clsetup() {
   cl::Buffer dev_b(context, CL_MEM_READ_ONLY, sizeof(int) * size);
   cl::Buffer dev_c(context, CL_MEM_READ_WRITE, sizeof(int) * size);
 
-  queue.enqueueWriteBuffer(dev_a, CL_TRUE, 0, sizeof(int) * size, a);
-  queue.enqueueWriteBuffer(dev_b, CL_TRUE, 0, sizeof(int) * size, b);
+  cl::CommandQueue queue(context, all_devices[0]);
+  queue.enqueueWriteBuffer(dev_a, CL_TRUE, 0, sizeof(int) * size, a.get());
+  queue.enqueueWriteBuffer(dev_b, CL_TRUE, 0, sizeof(int) * size, b.get());
 
   vectorAddKernel.setArg(0, dev_a);
   vectorAddKernel.setArg(1, dev_b);
@@ -94,7 +94,7 @@ void clsetup() {
   queue.enqueueNDRangeKernel(vectorAddKernel, cl::NullRange, cl::NDRange(1024),
                              cl::NDRange(4, 4, 1));
 
-  queue.enqueueReadBuffer(dev_c, CL_TRUE, 0, sizeof(int) * size, c);
+  queue.enqueueReadBuffer(dev_c, CL_TRUE, 0, sizeof(int) * size, c.get());
 
   queue.finish();
 

@@ -18,7 +18,7 @@ function display_help() {
 }
 
 # Ensure we have at least one argument
-if [ "$#" -lt 1 ]; then
+if [[ "$#" -lt 1 ]]; then
     echo "Error: No arguments provided."
     display_help
     exit 1
