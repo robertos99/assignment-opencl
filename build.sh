@@ -76,7 +76,7 @@ case $1 in
             cmake -DCMAKE_EXPORT_COMPILE_COMMANDS=ON .. &&
             run-clang-tidy
         else
-            echo "No build directory exists."
+            echo "No build directory exists. Init the project by building it before linting."
         fi
         ;;
 
