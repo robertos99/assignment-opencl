@@ -2,39 +2,10 @@
 #include <iostream>
 #include <string>
 
-#include "opencv2/opencv.hpp"
-#include "stb_image.h"
-#include "stb_image_write.h"
-// OpenCL includes
 #include <CL/opencl.hpp>
+#include "opencv2/opencv.hpp"
 
 #include "lib.hpp"
-
-int load_image(char* imagepath) {
-  int width = 0;
-  int height = 0;
-  int channels = 0;
-  unsigned char* img = stbi_load(imagepath, &width, &height, &channels, 0);
-  if (img == nullptr) {
-    std::cerr << "Error in loading the image\n" << std::endl;
-    return EXIT_FAILURE;
-  }
-
-  // Write the image back to disk
-  if (!stbi_write_png("resources/output_image.png", width, height, channels,
-                      img, width * channels)) {
-    std::cerr << "Error in saving the image\n" << std::endl;
-    stbi_image_free(img);
-    return EXIT_FAILURE;
-  }
-
-  // Free the image memory
-  stbi_image_free(img);
-
-  std::cout << "Image processing complete. Output saved as output_image.png.\n"
-            << std::endl;
-  return EXIT_SUCCESS;
-}
 
 void clsetup() {
 

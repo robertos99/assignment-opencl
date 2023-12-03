@@ -40,8 +40,6 @@ std::string read_kernel(const std::string& filename);
 
 void processImage(char* imgpath, char* writeToPath);
 
-int load_image(char* imagepath);
-
 void clsetup();
 
 void convertBGRToYCbCr(const ImageData& input);

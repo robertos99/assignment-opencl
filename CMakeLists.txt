@@ -23,14 +23,6 @@ FetchContent_Declare(
 )
 FetchContent_MakeAvailable(catch2)
 
-# Fetch stb
-FetchContent_Declare(
-    stb
-    GIT_REPOSITORY https://github.com/nothings/stb.git
-    GIT_TAG master
-)
-FetchContent_MakeAvailable(stb)
-
 find_package(OpenCV REQUIRED)
 
 #=======================================
@@ -38,8 +30,8 @@ find_package(OpenCV REQUIRED)
 #=======================================
 
 # Core library from source files
-add_library(core_lib STATIC src/lib.cpp src/stb_image.cpp)
-target_include_directories(core_lib PUBLIC src ${stb_SOURCE_DIR} ${OpenCV_INCLUDE_DIRS})
+add_library(core_lib STATIC src/lib.cpp)
+target_include_directories(core_lib PUBLIC src ${OpenCV_INCLUDE_DIRS})
 target_link_libraries(core_lib OpenCL ${OpenCV_LIBS})
 target_compile_definitions(core_lib PUBLIC CL_HPP_TARGET_OPENCL_VERSION=300)
 
