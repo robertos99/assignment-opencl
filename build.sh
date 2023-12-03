@@ -71,7 +71,7 @@ case $1 in
         ;;
 
     lint)
-        if [ -d "$BUILD_DIR" ]; then
+        if [[ -d "$BUILD_DIR" ]]; then
             cd "$BUILD_DIR" &&
             cmake -DCMAKE_EXPORT_COMPILE_COMMANDS=ON .. &&
             run-clang-tidy
