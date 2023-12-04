@@ -312,8 +312,8 @@ void dilation_opencl(const uchar* inputBlue, const uchar* inputGreen,
   cl::Buffer dev_oa(context, CL_MEM_READ_ONLY, sizeof(uchar) * size);
   cl::Buffer dev_ob(context, CL_MEM_READ_ONLY, sizeof(uchar) * size);
   cl::Buffer dev_oc(context, CL_MEM_READ_WRITE, sizeof(uchar) * size);
-  cl::Buffer dev_h(context, CL_MEM_READ_WRITE, sizeof(int));
   cl::Buffer dev_w(context, CL_MEM_READ_WRITE, sizeof(int));
+  cl::Buffer dev_h(context, CL_MEM_READ_WRITE, sizeof(int));
   cl::Buffer dev_s(context, CL_MEM_READ_WRITE, sizeof(int));
   cl::CommandQueue queue(context, all_devices[0]);
   queue.enqueueWriteBuffer(dev_a, CL_TRUE, 0, sizeof(uchar) * size, inputBlue);
@@ -324,8 +324,8 @@ void dilation_opencl(const uchar* inputBlue, const uchar* inputGreen,
   queue.enqueueWriteBuffer(dev_ob, CL_TRUE, 0, sizeof(uchar) * size,
                            outputGreen);
   queue.enqueueWriteBuffer(dev_oc, CL_TRUE, 0, sizeof(uchar) * size, outputRed);
-  queue.enqueueWriteBuffer(dev_h, CL_TRUE, 0, sizeof(int), &height);
   queue.enqueueWriteBuffer(dev_w, CL_TRUE, 0, sizeof(int), &width);
+  queue.enqueueWriteBuffer(dev_h, CL_TRUE, 0, sizeof(int), &height);
   queue.enqueueWriteBuffer(dev_s, CL_TRUE, 0, sizeof(int), &structElemSize);
 
   std::string kernel_source_code = read_kernel("./src/bgrDilation.cl");
@@ -347,11 +347,12 @@ void dilation_opencl(const uchar* inputBlue, const uchar* inputGreen,
   dilate.setArg(3, dev_oa);
   dilate.setArg(4, dev_ob);
   dilate.setArg(5, dev_oc);
-  dilate.setArg(6, dev_h);
-  dilate.setArg(7, dev_w);
+  dilate.setArg(6, dev_w);
+  dilate.setArg(7, dev_h);
   dilate.setArg(8, dev_s);
 
-  queue.enqueueNDRangeKernel(dilate, cl::NullRange, cl::NDRange(1),
+  cl::NDRange globalWorkSize(width, height);
+  queue.enqueueNDRangeKernel(dilate, cl::NullRange, globalWorkSize,
                              cl::NullRange);
 
   queue.enqueueReadBuffer(dev_oa, CL_TRUE, 0, sizeof(uchar) * size, outputBlue);
