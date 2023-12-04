@@ -1,6 +1,7 @@
 #ifndef LIB_HPP
 #define LIB_HPP
 
+#include <cstring>
 #include <fstream>
 #include <iostream>
 #include <string>

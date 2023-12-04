@@ -129,10 +129,10 @@ void ycbcr_cpp(uchar* blueChannel, uchar* greenChannel, uchar* redChannel,
       uchar green = greenChannel[idx];
       uchar red = redChannel[idx];
 
-      uchar Y = static_cast<uchar>(0.114 * blue + 0.587 * green + 0.299 * red);
-      uchar Cb =
+      auto Y = static_cast<uchar>(0.114 * blue + 0.587 * green + 0.299 * red);
+      auto Cb =
           static_cast<uchar>(-0.081 * blue - 0.419 * green + 0.500 * red + 128);
-      uchar Cr =
+      auto Cr =
           static_cast<uchar>(0.500 * blue - 0.331 * green - 0.169 * red + 128);
 
       // this isnt accurate. the names dont fit the RGB or BGR or whatver
@@ -157,8 +157,22 @@ void ycbcr_opencl(uchar* blueChannel, uchar* greenChannel, uchar* redChannel,
               << ", name: " << all_devices[i].getInfo<CL_DEVICE_NAME>()
               << std::endl;
   }
-
   cl::Context context({all_devices[0]});
+
+  int size = height * width;
+  cl::Buffer dev_a(context, CL_MEM_READ_ONLY, sizeof(uchar) * size);
+  cl::Buffer dev_b(context, CL_MEM_READ_ONLY, sizeof(uchar) * size);
+  cl::Buffer dev_c(context, CL_MEM_READ_WRITE, sizeof(uchar) * size);
+  cl::Buffer dev_h(context, CL_MEM_READ_WRITE, sizeof(int));
+  cl::Buffer dev_w(context, CL_MEM_READ_WRITE, sizeof(int));
+  cl::CommandQueue queue(context, all_devices[0]);
+  queue.enqueueWriteBuffer(dev_a, CL_TRUE, 0, sizeof(uchar) * size,
+                           blueChannel);
+  queue.enqueueWriteBuffer(dev_b, CL_TRUE, 0, sizeof(uchar) * size,
+                           greenChannel);
+  queue.enqueueWriteBuffer(dev_c, CL_TRUE, 0, sizeof(uchar) * size, redChannel);
+  queue.enqueueWriteBuffer(dev_h, CL_TRUE, 0, sizeof(int), &height);
+  queue.enqueueWriteBuffer(dev_w, CL_TRUE, 0, sizeof(int), &width);
 
   std::string kernel_source_code = read_kernel("./src/bgrToYCbCr.cl");
   cl::Program::Sources sources;
@@ -172,29 +186,15 @@ void ycbcr_opencl(uchar* blueChannel, uchar* greenChannel, uchar* redChannel,
               << std::endl;
     exit(1);
   }
-  cl::Kernel vectorAddKernel(program, "convertBGRToYCbCr");
+  cl::Kernel convertToYCbCrKernel(program, "convertBGRToYCbCr");
+  convertToYCbCrKernel.setArg(0, dev_a);
+  convertToYCbCrKernel.setArg(1, dev_b);
+  convertToYCbCrKernel.setArg(2, dev_c);
+  convertToYCbCrKernel.setArg(3, dev_h);
+  convertToYCbCrKernel.setArg(4, dev_w);
 
-  int size = height * width;
-
-  cl::Buffer dev_a(context, CL_MEM_READ_ONLY, sizeof(uchar) * size);
-  cl::Buffer dev_b(context, CL_MEM_READ_ONLY, sizeof(uchar) * size);
-  cl::Buffer dev_c(context, CL_MEM_READ_WRITE, sizeof(uchar) * size);
-
-  cl::CommandQueue queue(context, all_devices[0]);
-  queue.enqueueWriteBuffer(dev_a, CL_TRUE, 0, sizeof(uchar) * size,
-                           blueChannel);
-  queue.enqueueWriteBuffer(dev_b, CL_TRUE, 0, sizeof(uchar) * size,
-                           greenChannel);
-  queue.enqueueWriteBuffer(dev_c, CL_TRUE, 0, sizeof(uchar) * size, redChannel);
-
-  vectorAddKernel.setArg(0, dev_a);
-  vectorAddKernel.setArg(1, dev_b);
-  vectorAddKernel.setArg(2, dev_c);
-  vectorAddKernel.setArg(3, height);
-  vectorAddKernel.setArg(4, width);
-
-  queue.enqueueNDRangeKernel(vectorAddKernel, cl::NullRange,
-                             cl::NDRange(width, height), cl::NullRange);
+  queue.enqueueNDRangeKernel(convertToYCbCrKernel, cl::NullRange,
+                             cl::NDRange(1), cl::NullRange);
 
   queue.enqueueReadBuffer(dev_a, CL_TRUE, 0, sizeof(uchar) * size, blueChannel);
   queue.enqueueReadBuffer(dev_b, CL_TRUE, 0, sizeof(uchar) * size,
@@ -202,6 +202,8 @@ void ycbcr_opencl(uchar* blueChannel, uchar* greenChannel, uchar* redChannel,
   queue.enqueueReadBuffer(dev_c, CL_TRUE, 0, sizeof(uchar) * size, redChannel);
 
   queue.finish();
+
+  int a = 1;
 }
 
 void process_image_imgToDilation_cpp(const std::string& imgpath,
