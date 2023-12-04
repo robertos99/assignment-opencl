@@ -38,18 +38,18 @@ struct ImageData {
 
 std::string read_kernel(const std::string& filename);
 
-void processImage(char* imgpath, char* writeToPath);
-
-void clsetup();
-
-void convertBGRToYCbCr(const ImageData& input);
-
 cv::Mat imageDataToMat(const ImageData& imgData);
 
 ImageData parseMatToImageData(const cv::Mat& mat);
 
-void processImage2(const std::string& imgpath, const std::string& writeToPath);
+void process_image_imgToYCbCr_opencv(char* imgpath, char* writeToPath);
 
-void cl_convertBGRToYCbCr2(char* blueChannel, char* greenChannel,
-                           char* redChannel, int height, int width);
+void process_image_imgToYCbCr_cpp(const std::string& imgpath,
+                                  const std::string& writeToPath);
+
+void process_image_imgToYCbCr_opencl(const std::string& imgpath,
+                                     const std::string& writeToPath);
+
+void process_image_imgToDilation_cpp(const std::string& imgpath,
+                                     const std::string& writeToPath);
 #endif
