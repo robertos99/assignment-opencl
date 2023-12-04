@@ -6,6 +6,7 @@ build/*
 third_party/*
 !third_party/.gitkeep
 Testing/
+images/*
 
 ### VS Code
 .vscode/*
