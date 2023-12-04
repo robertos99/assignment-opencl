@@ -7,15 +7,20 @@
 
 #include "lib.hpp"
 
-void dilation_cpp(const uchar* inputBlue, const uchar* inputGreen,
-                  const uchar* inputRed, uchar* outputBlue, uchar* outputGreen,
-                  uchar* outputRed, int width, int height, int structElemSize);
-
 void ycbcr_cpp(uchar* blueChannel, uchar* greenChannel, uchar* redChannel,
                int height, int width);
 
 void ycbcr_opencl(uchar* blueChannel, uchar* greenChannel, uchar* redChannel,
                   int height, int width);
+
+void dilation_cpp(const uchar* inputBlue, const uchar* inputGreen,
+                  const uchar* inputRed, uchar* outputBlue, uchar* outputGreen,
+                  uchar* outputRed, int width, int height, int structElemSize);
+
+void dilation_opencl(const uchar* inputBlue, const uchar* inputGreen,
+                     const uchar* inputRed, uchar* outputBlue,
+                     uchar* outputGreen, uchar* outputRed, int width,
+                     int height, int structElemSize);
 
 std::string read_kernel(const std::string& filename) {
   std::string kernel_text;
@@ -202,8 +207,6 @@ void ycbcr_opencl(uchar* blueChannel, uchar* greenChannel, uchar* redChannel,
   queue.enqueueReadBuffer(dev_c, CL_TRUE, 0, sizeof(uchar) * size, redChannel);
 
   queue.finish();
-
-  int a = 1;
 }
 
 void process_image_imgToDilation_cpp(const std::string& imgpath,
@@ -225,6 +228,31 @@ void process_image_imgToDilation_cpp(const std::string& imgpath,
                inputData.redChannel, outputData.blueChannel,
                outputData.greenChannel, outputData.redChannel, inputData.width,
                inputData.height, 30);
+
+  cv::Mat outputMat = imageDataToMat(outputData);
+
+  cv::imwrite(writeToPath, outputMat);
+}
+
+void process_image_imgToDilation_opencl(const std::string& imgpath,
+                                        const std::string& writeToPath) {
+
+  // OPENCV reads in BGR and not RGB. so the names of the buffers (blueChannel, ...) are wrong.
+  // but im too lazy to correct.
+  cv::Mat inputMat = cv::imread(imgpath, cv::IMREAD_UNCHANGED);
+  if (inputMat.empty()) {
+    std::cerr << "Error: Unable to open image file." << std::endl;
+    return;
+  }
+
+  ImageData inputData = parseMatToImageData(inputMat);
+  ImageData outputData;
+  outputData.allocate(inputData.width, inputData.height);
+
+  dilation_opencl(inputData.blueChannel, inputData.greenChannel,
+                  inputData.redChannel, outputData.blueChannel,
+                  outputData.greenChannel, outputData.redChannel,
+                  inputData.width, inputData.height, 30);
 
   cv::Mat outputMat = imageDataToMat(outputData);
 
@@ -257,4 +285,79 @@ void dilation_cpp(const uchar* inputBlue, const uchar* inputGreen,
       outputRed[idx] = maxValRed;
     }
   }
+}
+
+void dilation_opencl(const uchar* inputBlue, const uchar* inputGreen,
+                     const uchar* inputRed, uchar* outputBlue,
+                     uchar* outputGreen, uchar* outputRed, int width,
+                     int height, int structElemSize) {
+
+  std::vector<cl::Platform> all_platforms;
+  cl::Platform::get(&all_platforms);
+
+  std::vector<cl::Device> all_devices;
+  all_platforms[0].getDevices(CL_DEVICE_TYPE_GPU, &all_devices);
+  std::cout << "These are the devices available: " << std::endl;
+  for (int i = 0; i < all_devices.size(); i++) {
+    std::cout << "Device #" << i
+              << ", name: " << all_devices[i].getInfo<CL_DEVICE_NAME>()
+              << std::endl;
+  }
+  cl::Context context({all_devices[0]});
+
+  int size = height * width;
+  cl::Buffer dev_a(context, CL_MEM_READ_ONLY, sizeof(uchar) * size);
+  cl::Buffer dev_b(context, CL_MEM_READ_ONLY, sizeof(uchar) * size);
+  cl::Buffer dev_c(context, CL_MEM_READ_WRITE, sizeof(uchar) * size);
+  cl::Buffer dev_oa(context, CL_MEM_READ_ONLY, sizeof(uchar) * size);
+  cl::Buffer dev_ob(context, CL_MEM_READ_ONLY, sizeof(uchar) * size);
+  cl::Buffer dev_oc(context, CL_MEM_READ_WRITE, sizeof(uchar) * size);
+  cl::Buffer dev_h(context, CL_MEM_READ_WRITE, sizeof(int));
+  cl::Buffer dev_w(context, CL_MEM_READ_WRITE, sizeof(int));
+  cl::Buffer dev_s(context, CL_MEM_READ_WRITE, sizeof(int));
+  cl::CommandQueue queue(context, all_devices[0]);
+  queue.enqueueWriteBuffer(dev_a, CL_TRUE, 0, sizeof(uchar) * size, inputBlue);
+  queue.enqueueWriteBuffer(dev_b, CL_TRUE, 0, sizeof(uchar) * size, inputGreen);
+  queue.enqueueWriteBuffer(dev_c, CL_TRUE, 0, sizeof(uchar) * size, inputRed);
+  queue.enqueueWriteBuffer(dev_oa, CL_TRUE, 0, sizeof(uchar) * size,
+                           outputBlue);
+  queue.enqueueWriteBuffer(dev_ob, CL_TRUE, 0, sizeof(uchar) * size,
+                           outputGreen);
+  queue.enqueueWriteBuffer(dev_oc, CL_TRUE, 0, sizeof(uchar) * size, outputRed);
+  queue.enqueueWriteBuffer(dev_h, CL_TRUE, 0, sizeof(int), &height);
+  queue.enqueueWriteBuffer(dev_w, CL_TRUE, 0, sizeof(int), &width);
+  queue.enqueueWriteBuffer(dev_s, CL_TRUE, 0, sizeof(int), &structElemSize);
+
+  std::string kernel_source_code = read_kernel("./src/bgrDilation.cl");
+  cl::Program::Sources sources;
+  sources.push_back({kernel_source_code.c_str(), kernel_source_code.length()});
+
+  cl::Program program(context, sources);
+  if (program.build({all_devices[0]}) != CL_SUCCESS) {
+    std::cerr << "Cannot build the program!" << std::endl;
+    std::cerr << "Build log: \n"
+              << program.getBuildInfo<CL_PROGRAM_BUILD_LOG>(all_devices[0])
+              << std::endl;
+    exit(1);
+  }
+  cl::Kernel dilate(program, "dilate");
+  dilate.setArg(0, dev_a);
+  dilate.setArg(1, dev_b);
+  dilate.setArg(2, dev_c);
+  dilate.setArg(3, dev_oa);
+  dilate.setArg(4, dev_ob);
+  dilate.setArg(5, dev_oc);
+  dilate.setArg(6, dev_h);
+  dilate.setArg(7, dev_w);
+  dilate.setArg(8, dev_s);
+
+  queue.enqueueNDRangeKernel(dilate, cl::NullRange, cl::NDRange(1),
+                             cl::NullRange);
+
+  queue.enqueueReadBuffer(dev_oa, CL_TRUE, 0, sizeof(uchar) * size, outputBlue);
+  queue.enqueueReadBuffer(dev_ob, CL_TRUE, 0, sizeof(uchar) * size,
+                          outputGreen);
+  queue.enqueueReadBuffer(dev_oc, CL_TRUE, 0, sizeof(uchar) * size, outputRed);
+
+  queue.finish();
 }

@@ -53,4 +53,7 @@ void process_image_imgToYCbCr_opencl(const std::string& imgpath,
 
 void process_image_imgToDilation_cpp(const std::string& imgpath,
                                      const std::string& writeToPath);
+
+void process_image_imgToDilation_opencl(const std::string& imgpath,
+                                        const std::string& writeToPath);
 #endif
