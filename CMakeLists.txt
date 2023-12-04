@@ -1,34 +1,51 @@
 cmake_minimum_required(VERSION 3.10)
 project(assignment-opencl)
 
-## Dependencies
+# Specify the C++ standard
+set(CMAKE_CXX_STANDARD 11)
+set(CMAKE_CXX_STANDARD_REQUIRED True)
+
+# Set default compile flags for Debug and Release
+set(CMAKE_CXX_FLAGS_DEBUG "-g")
+set(CMAKE_CXX_FLAGS_RELEASE "-O3")
+
+#=======================================
+#==== Dependencies
+#=======================================
+
 include(FetchContent)
+
+# Fetch Catch2
 FetchContent_Declare(
-    unity
-    GIT_REPOSITORY https://github.com/ThrowTheSwitch/Unity.git
-    GIT_TAG master  # or a specific version or commit
+    catch2
+    GIT_REPOSITORY https://github.com/catchorg/Catch2.git
+    GIT_TAG v2.x
 )
-FetchContent_GetProperties(unity)
-if(NOT unity_POPULATED)
-    FetchContent_Populate(unity)
-    include_directories(${unity_SOURCE_DIR}/src)
-endif()
-FetchContent_MakeAvailable(unity)
+FetchContent_MakeAvailable(catch2)
 
+find_package(OpenCV REQUIRED)
 
-## Core library from source files
-add_library(core_lib STATIC src/helloworld.c)
-target_include_directories(core_lib PUBLIC src)
+#=======================================
+#==== Core-Lib
+#=======================================
 
-## Main executable
-add_executable(assignment-opencl src/main.c)
+# Core library from source files
+add_library(core_lib STATIC src/openmp_lib.cpp)
+target_include_directories(core_lib PUBLIC src ${OpenCV_INCLUDE_DIRS})
+target_link_libraries(core_lib OpenCL ${OpenCV_LIBS})
+target_compile_definitions(core_lib PUBLIC CL_HPP_TARGET_OPENCL_VERSION=300)
+
+# Apply general compile options
+target_compile_options(core_lib PRIVATE -Wall -Wextra)
+
+#=======================================
+#==== Binaries
+#=======================================
+
+# Main executable
+add_executable(assignment-opencl src/main.cpp)
 target_link_libraries(assignment-opencl core_lib)
 set_target_properties(assignment-opencl PROPERTIES RUNTIME_OUTPUT_DIRECTORY ${CMAKE_SOURCE_DIR}/bin)
 
-## Unit tests using Unity
-enable_testing()
-add_executable(assignment-opencl_tests tests/test_helloworld.c ${unity_SOURCE_DIR}/src/unity.c)
-target_link_libraries(assignment-opencl_tests core_lib)
-target_include_directories(assignment-opencl_tests PRIVATE ${unity_SOURCE_DIR}/src)
-set_target_properties(assignment-opencl_tests PROPERTIES RUNTIME_OUTPUT_DIRECTORY ${CMAKE_SOURCE_DIR}/bin)
-add_test(NAME assignment-opencl_tests COMMAND assignment-opencl_tests)
+# Apply general compile options
+target_compile_options(assignment-opencl PRIVATE -Wall -Wextra)
