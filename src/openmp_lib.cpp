@@ -4,17 +4,34 @@
 #include "openmp_lib.hpp"
 #include "opencv2/opencv.hpp"
 
-const char *yCbCr_opencv()
+void yCbCr_opencv(std::string imgPath)
 {
-    std::string imgPath = "../images/animal/2.kitten_medium.jpg";
-    cv::Mat img = cv::imread(imgPath, cv::COLOR_YCrCb2RGB);
+    cv::Mat srcImg = cv::imread(imgPath);
+    cv::Mat YCbCrImg;
 
-    if(img.empty()){
+    if(srcImg.empty()){
         std::cout << "Could not read image path " << imgPath << std::endl;
-        return nullptr;
+        return;
     }
 
-    cv::imwrite("../out/yCbCr_out.jpg", img);
+    cv::cvtColor(srcImg, YCbCrImg, cv::COLOR_YCrCb2RGB);
+    cv::imwrite("out/yCbCr_out.jpg", YCbCrImg);
 
-    return nullptr;
+    return;
+}
+
+void dilatation_opencv(std::string imgPath)
+{
+    cv::Mat srcImg = cv::imread(imgPath);
+    cv::Mat dilatationImg;
+
+    if(srcImg.empty()){
+        std::cout << "Could not read image path " << imgPath << std::endl;
+        return;
+    }
+
+    cv::dilate(srcImg, dilatationImg, cv::Mat(), cv::Point(-1, -1), 5);
+    cv::imwrite("out/dilatation_out.jpg", dilatationImg);
+
+    return;
 }
