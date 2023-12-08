@@ -30,7 +30,7 @@ find_package(OpenCV REQUIRED)
 #=======================================
 
 # Core library from source files
-add_library(core_lib STATIC src/openmp_lib.cpp)
+add_library(core_lib STATIC src/openCL_lib.cpp)
 target_include_directories(core_lib PUBLIC src ${OpenCV_INCLUDE_DIRS})
 target_link_libraries(core_lib OpenCL ${OpenCV_LIBS})
 target_compile_definitions(core_lib PUBLIC CL_HPP_TARGET_OPENCL_VERSION=300)
