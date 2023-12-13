@@ -2,13 +2,14 @@
 #include <iostream>
 
 #include "openCL_lib.hpp"
+
 int main()
 {
-    std::string imgPath = "images/animal/4.kitten_huge.jpg";
-    // std::string dstPath;
+    std::string filepath = "images/animal/4.kitten_huge.jpg";
+    // std::string dst_path;
     
-    yCbCr_opencv(imgPath);
-    dilatation_opencv(imgPath);
-    yCbCr_opencl();
+    // yCbCrWithOpenCV(img_path);
+    // dilatationWithOpenCV(img_path);
+    convertToYCbCrInOpenCL(filepath);
     return 0;
 }

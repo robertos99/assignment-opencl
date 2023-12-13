@@ -1,45 +1,44 @@
 // implement openmp functions here; with kernel and threadings etc ...
 #include <iostream>
 #include <fstream>
-
-#include "openCL_lib.hpp"
-
-#include "opencv2/opencv.hpp"
 #include <CL/opencl.hpp>
 
-void yCbCr_opencv(std::string img_path)
-{
-    cv::Mat src_img = cv::imread(img_path);
-    cv::Mat YCbCrImg;
+#include "opencv2/opencv.hpp"
+#include "openCL_lib.hpp"
 
-    if(src_img.empty()){
-        std::cout << "Could not read image path " << img_path << std::endl;
+void yCbCrWithOpenCV(std::string filepath)
+{
+    cv::Mat img_data = cv::imread(filepath);
+    cv::Mat YCbCr_img;
+
+    if(img_data.empty()){
+        std::cout << "Could not read image path " << filepath << std::endl;
         return;
     }
 
-    cv::cvtColor(src_img, YCbCrImg, cv::COLOR_YCrCb2RGB);
-    cv::imwrite("out/yCbCr_out.jpg", YCbCrImg);
+    cv::cvtColor(img_data, YCbCr_img, cv::COLOR_YCrCb2RGB);
+    cv::imwrite("out/yCbCr_out.jpg", YCbCr_img);
 
     return;
 }
 
-void dilatation_opencv(std::string img_path)
+void dilatationWithOpenCV(std::string filepath)
 {
-    cv::Mat src_img = cv::imread(img_path);
+    cv::Mat img_data = cv::imread(filepath);
     cv::Mat dilatation_img;
 
-    if(src_img.empty()){
-        std::cout << "Could not read image path " << img_path << std::endl;
+    if(img_data.empty()){
+        std::cout << "Could not read image path " << filepath << std::endl;
         return;
     }
 
-    cv::dilate(src_img, dilatation_img, cv::Mat(), cv::Point(-1, -1), 5);
+    cv::dilate(img_data, dilatation_img, cv::Mat(), cv::Point(-1, -1), 5);
     cv::imwrite("out/dilatation_out.jpg", dilatation_img); 
 
     return;
 }
 
-std::string read_kernel( const std::string& filename )
+std::string readKernel(const std::string& filename)
 {
   std::string kernel_text;
 
@@ -57,38 +56,74 @@ std::string read_kernel( const std::string& filename )
   return kernel_text;
 }
 
+void convertToYCbCrInOpenCL(std::string filepath){
+    cv::Mat img_data = cv::imread(filepath);
 
-void yCbCr_opencl()
-{
-    std::vector<cl::Platform> all_platforms;                             // vector: "Vectors are sequence containers representing arrays that can change in size."
-    cl::Platform::get(&all_platforms);                                   // get all platforms
+    // Loop over image data
+    int height = img_data.rows;
+    int width = img_data.cols;
+    int depth = img_data.channels(); // bgr
 
-    std::vector<cl::Device> all_devices;                                 // create device list
-    cl::Platform selectedPlatform = all_platforms[0];                    // select platform
-    selectedPlatform.getDevices(CL_DEVICE_TYPE_GPU, &all_devices);       // get all devices from first el in platforms list
-    std::cout << "These are the devices available: " << std::endl;
-    for (int i = 0; i < (int)all_devices.size(); i++) {
-    std::cout << "Device #" << i
-              << ", name: " << all_devices[i].getInfo<CL_DEVICE_NAME>()
-              << std::endl;
+    int size = height * width;
+
+    for(int i = 0; i < width; i++){
+        for(int j = 0; j < height; j++){
+            // get (h, w, b, g, r) for each pixel
+            cv::Vec3b pixel = img_data.at<cv::Vec3b>(i, j);
+
+            uint blue = pixel[0];
+            uint green = pixel[1];
+            uint red = pixel[2];
+        }
+    }
+    
+    // Query for available OpenCL platforms and devices
+    std::vector<cl::Platform> all_platforms;
+    cl::Platform::get(&all_platforms);
+
+    if(all_platforms.size() == 0){
+        std::cout << " No platforms found. Check OpenCL installation!\n";
+        exit(1);
     }
 
-    cl::Device default_device = all_devices[0];                         // select gpu device
+    cl::Platform selected_platform = all_platforms[0];
+    std::vector<cl::Device> all_devices;
+    selected_platform.getDevices(CL_DEVICE_TYPE_GPU, &all_devices);
 
-    // create command queue and context
-    cl::Context context(default_device);                                // what does context do? 
-    cl::CommandQueue queue(context, default_device);                    // queue is for ordering commands
+    if(all_devices.size() == 0){
+        std::cout << " No devices found. Check OpenCL installation!\n";
+        exit(1);
+    }
 
-    cl::Program::Sources sources;                                       // Sources is a list of pairs <kernel-code, string length>
+    std::cout << "Listing devices form " << selected_platform.getInfo<CL_PLATFORM_NAME>() << " (platform)" << std::endl;
+    // std::cout << "Here is the list of available devices: " << std::endl;
+    for(int i = 0; i < (int)all_devices.size(); i++){
+        std::cout << "Device # " << i
+        << ", name: " << all_devices[i].getInfo<CL_DEVICE_NAME>()
+        << std::endl;
+    }
+    cl::Device selected_device = all_devices[0];
+    std::cout << "Selecting this device: " << selected_device.getInfo<CL_DEVICE_NAME>() << "\n";
 
-    std::string kernel1 = read_kernel("kernel.cl");
+    // Create a context for one or more OpenCL devices in a platform
+    cl::Context context(selected_device);
+    cl::CommandQueue queue({context, selected_device});
+
+    // Create and build programs for OpenCL devices in the context
+    cl::Program::Sources sources;
+    std::string kernel1 = readKernel("kernel.cl");
+
+    // Select kernels to execute from the programs
     sources.push_back({kernel1.c_str(), kernel1.length()});
-
     cl::Program program(context, sources);
-	if (program.build(default_device) != CL_SUCCESS)
-    {
-		std::cout << "Error building: " 
-        << program.getBuildInfo<CL_PROGRAM_BUILD_LOG>(default_device) << "\n";
+    if(program.build(selected_device) != CL_SUCCESS){
+		std::cout << "Error building: " << program.getBuildInfo<CL_PROGRAM_BUILD_LOG>(selected_device) << "\n";
 		exit(1);
-	}
-}   
+    }
+    // Create memory objects for kernels to operate on
+    cl::Buffer dev_blue(context, CL_MEM_READ_ONLY, sizeof(int) * size);
+    cl::Buffer dev_green(context, CL_MEM_READ_ONLY, sizeof(int) * size);
+    cl::Buffer dev_red(context, CL_MEM_READ_ONLY, sizeof(int) * size);
+    cl::Buffer dev_height(context, CL_MEM_READ_ONLY, sizeof(int) * size);
+    cl::Buffer dev_width(context, CL_MEM_READ_ONLY, sizeof(int) * size);
+}

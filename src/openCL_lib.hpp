@@ -2,9 +2,9 @@
 #ifndef OPENCL_LIB_HPP
 #define OPENCL_LIB_HPP
 
-void yCbCr_opencv(std::string img_path);
-void dilatation_opencv(std::string img_path);
+void yCbCrWithOpenCV(std::string filepath);
+void dilatationWithOpenCV(std::string filepath);
 // void yCbCr_self(std::string imgPath);
-void yCbCr_opencl();
+void convertToYCbCrInOpenCL(std::string filepath);
 
 #endif
