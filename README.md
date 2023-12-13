@@ -28,6 +28,8 @@ Here's what you'll need to run the project:
    ```bash
    sudo apt-get update 
    sudo apt-get install cmake
+- **OpenCV**: Image loading library.
+- **OpenCL**: Runs code on devices like Graphics Cards.
 
 ### Installation
 

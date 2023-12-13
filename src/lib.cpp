@@ -306,6 +306,7 @@ void dilation_opencl(const uchar* inputBlue, const uchar* inputGreen,
   cl::Context context({all_devices[0]});
 
   int size = height * width;
+  int threadCount = size / 16;
   cl::Buffer dev_a(context, CL_MEM_READ_ONLY, sizeof(uchar) * size);
   cl::Buffer dev_b(context, CL_MEM_READ_ONLY, sizeof(uchar) * size);
   cl::Buffer dev_c(context, CL_MEM_READ_WRITE, sizeof(uchar) * size);
@@ -315,6 +316,7 @@ void dilation_opencl(const uchar* inputBlue, const uchar* inputGreen,
   cl::Buffer dev_w(context, CL_MEM_READ_WRITE, sizeof(int));
   cl::Buffer dev_h(context, CL_MEM_READ_WRITE, sizeof(int));
   cl::Buffer dev_s(context, CL_MEM_READ_WRITE, sizeof(int));
+  cl::Buffer dev_count(context, CL_MEM_READ_WRITE, sizeof(int));
   cl::CommandQueue queue(context, all_devices[0]);
   queue.enqueueWriteBuffer(dev_a, CL_TRUE, 0, sizeof(uchar) * size, inputBlue);
   queue.enqueueWriteBuffer(dev_b, CL_TRUE, 0, sizeof(uchar) * size, inputGreen);
@@ -327,6 +329,8 @@ void dilation_opencl(const uchar* inputBlue, const uchar* inputGreen,
   queue.enqueueWriteBuffer(dev_w, CL_TRUE, 0, sizeof(int), &width);
   queue.enqueueWriteBuffer(dev_h, CL_TRUE, 0, sizeof(int), &height);
   queue.enqueueWriteBuffer(dev_s, CL_TRUE, 0, sizeof(int), &structElemSize);
+  queue.enqueueWriteBuffer(dev_count, CL_TRUE, 0, sizeof(int),
+                           &threadCount);  // Size of the array
 
   std::string kernel_source_code = read_kernel("./src/bgrDilation.cl");
   cl::Program::Sources sources;
@@ -350,6 +354,7 @@ void dilation_opencl(const uchar* inputBlue, const uchar* inputGreen,
   dilate.setArg(6, dev_w);
   dilate.setArg(7, dev_h);
   dilate.setArg(8, dev_s);
+  dilate.setArg(9, dev_count);
 
   cl::NDRange globalWorkSize(width, height);
   queue.enqueueNDRangeKernel(dilate, cl::NullRange, globalWorkSize,
@@ -359,6 +364,5 @@ void dilation_opencl(const uchar* inputBlue, const uchar* inputGreen,
   queue.enqueueReadBuffer(dev_ob, CL_TRUE, 0, sizeof(uchar) * size,
                           outputGreen);
   queue.enqueueReadBuffer(dev_oc, CL_TRUE, 0, sizeof(uchar) * size, outputRed);
-
   queue.finish();
 }
