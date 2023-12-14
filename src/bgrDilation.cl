@@ -7,9 +7,9 @@ __kernel void dilate(__global const uchar* inputBlue,
                      __global int* maxPixelPerThreadY) {
   int x = get_global_id(0);
   int y = get_global_id(1);
-  for (int pixelOffsetX = 0; pixelOffsetX <= (*maxPixelPerThreadX);
+  for (int pixelOffsetX = 0; pixelOffsetX < (*maxPixelPerThreadX);
        pixelOffsetX++) {
-    for (int pixelOffsetY = 0; pixelOffsetY <= (*maxPixelPerThreadY);
+    for (int pixelOffsetY = 0; pixelOffsetY < (*maxPixelPerThreadY);
          pixelOffsetY++) {
       int pixelOfInterestX = x * (*maxPixelPerThreadX) + pixelOffsetX;
       int pixelOfInterestY = y * (*maxPixelPerThreadY) + pixelOffsetY;

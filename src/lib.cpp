@@ -171,11 +171,15 @@ void ycbcr_opencl(uchar* blueChannel, uchar* greenChannel, uchar* redChannel,
   cl::Context context({all_devices[0]});
 
   int size = height * width;
+  int maxPixelPerThreadX = 1;
+  int maxPixelPerThreadY = 1;
   cl::Buffer dev_a(context, CL_MEM_READ_ONLY, sizeof(uchar) * size);
   cl::Buffer dev_b(context, CL_MEM_READ_ONLY, sizeof(uchar) * size);
   cl::Buffer dev_c(context, CL_MEM_READ_WRITE, sizeof(uchar) * size);
   cl::Buffer dev_h(context, CL_MEM_READ_WRITE, sizeof(int));
   cl::Buffer dev_w(context, CL_MEM_READ_WRITE, sizeof(int));
+  cl::Buffer dev_maxPixelPerThreadX(context, CL_MEM_READ_WRITE, sizeof(int));
+  cl::Buffer dev_maxPixelPerThreadY(context, CL_MEM_READ_WRITE, sizeof(int));
   cl::CommandQueue queue(context, all_devices[0]);
   queue.enqueueWriteBuffer(dev_a, CL_TRUE, 0, sizeof(uchar) * size,
                            blueChannel);
@@ -184,6 +188,10 @@ void ycbcr_opencl(uchar* blueChannel, uchar* greenChannel, uchar* redChannel,
   queue.enqueueWriteBuffer(dev_c, CL_TRUE, 0, sizeof(uchar) * size, redChannel);
   queue.enqueueWriteBuffer(dev_h, CL_TRUE, 0, sizeof(int), &height);
   queue.enqueueWriteBuffer(dev_w, CL_TRUE, 0, sizeof(int), &width);
+  queue.enqueueWriteBuffer(dev_maxPixelPerThreadX, CL_TRUE, 0, sizeof(int),
+                           &maxPixelPerThreadX);
+  queue.enqueueWriteBuffer(dev_maxPixelPerThreadY, CL_TRUE, 0, sizeof(int),
+                           &maxPixelPerThreadY);
 
   std::string kernel_source_code = read_kernel("./src/bgrToYCbCr.cl");
   cl::Program::Sources sources;
@@ -203,9 +211,12 @@ void ycbcr_opencl(uchar* blueChannel, uchar* greenChannel, uchar* redChannel,
   convertToYCbCrKernel.setArg(2, dev_c);
   convertToYCbCrKernel.setArg(3, dev_h);
   convertToYCbCrKernel.setArg(4, dev_w);
+  convertToYCbCrKernel.setArg(5, dev_maxPixelPerThreadX);
+  convertToYCbCrKernel.setArg(6, dev_maxPixelPerThreadY);
 
+  cl::NDRange globalWorkSize(width, height);
   queue.enqueueNDRangeKernel(convertToYCbCrKernel, cl::NullRange,
-                             cl::NDRange(1), cl::NullRange);
+                             globalWorkSize, cl::NullRange);
 
   queue.enqueueReadBuffer(dev_a, CL_TRUE, 0, sizeof(uchar) * size, blueChannel);
   queue.enqueueReadBuffer(dev_b, CL_TRUE, 0, sizeof(uchar) * size,
@@ -338,9 +349,9 @@ void dilation_opencl(const uchar* inputBlue, const uchar* inputGreen,
   queue.enqueueWriteBuffer(dev_h, CL_TRUE, 0, sizeof(int), &height);
   queue.enqueueWriteBuffer(dev_s, CL_TRUE, 0, sizeof(int), &structElemSize);
   queue.enqueueWriteBuffer(dev_maxPixelPerThreadX, CL_TRUE, 0, sizeof(int),
-                           &maxPixelPerThreadX);  // Size of the array
+                           &maxPixelPerThreadX);
   queue.enqueueWriteBuffer(dev_maxPixelPerThreadY, CL_TRUE, 0, sizeof(int),
-                           &maxPixelPerThreadY);  // Size of the array
+                           &maxPixelPerThreadY);
 
   std::string kernel_source_code = read_kernel("./src/bgrDilation.cl");
   cl::Program::Sources sources;
