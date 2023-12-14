@@ -7,6 +7,12 @@
 
 #include "lib.hpp"
 
+std::string read_kernel(const std::string& filename);
+
+cv::Mat imageDataToMat(const ImageData& imgData);
+
+ImageData parseMatToImageData(const cv::Mat& mat);
+
 void ycbcr_cpp(uchar* blueChannel, uchar* greenChannel, uchar* redChannel,
                int height, int width);
 
@@ -306,8 +312,8 @@ void dilation_opencl(const uchar* inputBlue, const uchar* inputGreen,
   cl::Context context({all_devices[0]});
 
   int size = height * width;
-  int maxPixelPerThreadX = 200;
-  int maxPixelPerThreadY = 200;
+  int maxPixelPerThreadX = 2;
+  int maxPixelPerThreadY = 2;
   cl::Buffer dev_a(context, CL_MEM_READ_ONLY, sizeof(uchar) * size);
   cl::Buffer dev_b(context, CL_MEM_READ_ONLY, sizeof(uchar) * size);
   cl::Buffer dev_c(context, CL_MEM_READ_WRITE, sizeof(uchar) * size);

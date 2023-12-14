@@ -37,12 +37,6 @@ struct ImageData {
   }
 };
 
-std::string read_kernel(const std::string& filename);
-
-cv::Mat imageDataToMat(const ImageData& imgData);
-
-ImageData parseMatToImageData(const cv::Mat& mat);
-
 void process_image_imgToYCbCr_opencv(char* imgpath, char* writeToPath);
 
 void process_image_imgToYCbCr_cpp(const std::string& imgpath,
