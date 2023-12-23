@@ -1,15 +1,19 @@
 // function calls from openmp_lib.cpp here
 #include <iostream>
 
-#include "openCL_lib.hpp"
+#include "openCL-lib.hpp"
 
 int main()
 {
-    std::string filepath = "images/animal/4.kitten_huge.jpg";
-    // std::string dst_path;
+    std::string filepath = "images/animal/1.kitten_small.jpg";
+    // std::string dstPath = "out/";
     
-    // yCbCrWithOpenCV(img_path);
-    // dilatationWithOpenCV(img_path);
-    convertToYCbCrInOpenCL(filepath);
+    // BGRtoYCbCrWithOpenCV(filepath);
+    // dilatationWithOpenCV(filepath);
+    // convertToYCbCrWithOpenCL(filepath);
+    // BGRtoYCbCrWithCPP(filepath);
+    // func(filepath);
+    foo(filepath);
+
     return 0;
 }
