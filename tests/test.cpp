@@ -1,19 +1,9 @@
-#include "openmp_lib.hpp"
+#define CATCH_CONFIG_MAIN
+#include <catch2/catch.hpp>
 
-void setUp(void)
-{
-    // This function runs before EACH TEST
-}
+TEST_CASE("say_hello returns the correct string", "[hello_world]") {
+  const char *expected = "Hello, World!";
+  const char *actual = "Hello, World!";
 
-void tearDown(void)
-{
-    // This function runs after EACH TEST
-}
-
-void some_test_method_name(void)
-{
-}
-
-int main(void)
-{
+  REQUIRE(std::string(actual) == std::string(expected));
 }
